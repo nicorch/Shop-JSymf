@@ -1,5 +1,7 @@
 {
     "name": "nicorch/shop-jsymf",
+    "description": "App project",
+    "version": "0.0.1",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "dev",
