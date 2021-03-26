@@ -1,0 +1,18 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Endpoints{% endblock %}
+
+{% block body %}
+<div class="">
+    <h1>Endpoints List</h1>
+
+    Products:
+    <ul>
+        <li>GET - All product are listed in <code><a href="{{path('products')}}" target="_blank">api/products</a></code></li>
+        <li>GET - One product is detail in <code><a href="{{path('product_item', {'id': 1})}}" target="_blank">api/product/{id}</a></code></li>
+        <li>PUT - Add one product in <code><a target="_blank">api/product/</a></code></li>
+        <li>STASH - Edit one product by resent it in <code><a target="_blank">api/product/edit/{id}</a></code></li>
+        <li>DELETE - Delete one product in <code><a target="_blank">api/product/delete/{id}</a></code></li>
+    </ul>
+</div>
+{% endblock %}
