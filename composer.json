@@ -63,6 +63,7 @@
     },
     "scripts": {
         "test": {
+            "test:init": "pwd && ls && php -v",
             "test:get:index": "php ./bin/phpunit tests/Index.php",
             "test:product:add": "php ./bin/phpunit tests/Api/Product/AddTest.php"
         },
