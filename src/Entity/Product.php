@@ -2,8 +2,11 @@
 
 namespace App\Entity;
 
-use App\Repository\ProductRepository;
+use DateTime;
 use Doctrine\ORM\Mapping as ORM;
+use App\Repository\ProductRepository;
+use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity(repositoryClass=ProductRepository::class)
@@ -62,6 +65,23 @@ class Product
      */
     private $size;
 
+    /**
+     * @ORM\OneToMany(targetEntity=Option::class, mappedBy="product")
+     */
+    private $options;
+
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $isClone;
+
+    public function __construct()
+    {
+        $this->dateCreated = new DateTime();
+        $this->options = new ArrayCollection();
+        $this->isClone = false;
+    }
+
     public function toArray()
     {
         return [
@@ -72,6 +92,9 @@ class Product
             'color' => ($this->getColor()) ? $this->getColor() : null,
             'size' => ($this->getSize()) ? $this->getSize() : null,
             'imgUrl' => ($this->getImgUrl()) ? $this->getImgUrl() : null,
+            'options' => array_map(function ($option){
+                return $option->toArray();
+            }, $this->getOptions()->toArray()),
             'dateEdit' => ($this->getDateEdit()) ? $this->getDateEdit()->format('d-m-Y H:i') : null,
             'dateCreated' => $this->getDateCreated()->format('d-m-Y H:i'),
             'isVisible' => $this->getIsVisible(),
@@ -187,6 +210,48 @@ class Product
     public function setSize(?string $size): self
     {
         $this->size = $size;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Option[]
+     */
+    public function getOptions(): Collection
+    {
+        return $this->options;
+    }
+
+    public function addOption(Option $option): self
+    {
+        if (!$this->options->contains($option)) {
+            $this->options[] = $option;
+            $option->setProduct($this);
+        }
+
+        return $this;
+    }
+
+    public function removeOption(Option $option): self
+    {
+        if ($this->options->removeElement($option)) {
+            // set the owning side to null (unless already changed)
+            if ($option->getProduct() === $this) {
+                $option->setProduct(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getIsClone(): ?bool
+    {
+        return $this->isClone;
+    }
+
+    public function setIsClone(bool $isClone): self
+    {
+        $this->isClone = $isClone;
 
         return $this;
     }
