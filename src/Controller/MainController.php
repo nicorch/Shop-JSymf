@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Cart;
 use App\Entity\Product;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -18,8 +19,13 @@ class MainController extends AbstractController
 
         return $this->render('main/index.html.twig', [
             'controller_name' => 'MainController',
-            'products' => $em->getRepository(Product::class)->findAll()
+            'products' => $em->getRepository(Product::class)->findAll(),
+            'cart' => $this->getCart($em)
         ]);
     }
 
+    public function getCart($em)
+    {
+        return $cart = $em->getRepository(Cart::class)->findOneBy(['id' => 1]);
+    }
 }
