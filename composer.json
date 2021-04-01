@@ -62,11 +62,12 @@
         "symfony/polyfill-php72": "*"
     },
     "scripts": {
-        "test": {
-            "test:init": "pwd && ls && php -v",
-            "test:get:index": "php ./bin/phpunit tests/Index.php",
-            "test:product:add": "php ./bin/phpunit tests/Api/Product/AddTest.php"
-        },
+        "test": [
+            "@php bin/phpunit tests/Index.php",
+            "@php bin/phpunit tests/Api/Product/AddProduct.php",
+            "@php bin/phpunit tests/Api/Product/AddOpt.php",
+            "@php bin/phpunit tests/Api/Product/RmProduct.php"
+        ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
             "assets:install %PUBLIC_DIR%": "symfony-cmd"
@@ -88,3 +89,4 @@
         }
     }
 }
+

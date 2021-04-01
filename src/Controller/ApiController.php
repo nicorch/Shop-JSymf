@@ -71,6 +71,16 @@ class ApiController extends AbstractController
     }
 
     /**
+     * @Route("/product/getlast", name="product_last",methods={"GET"})
+     */
+    public function productLast(EntityManagerInterface $em): Response
+    {
+        $product = $em->getRepository(Product::class)->findOneBy(array(),array('id'=>'DESC'),1,0);
+
+        return $this->json($product->toArray(), Response::HTTP_CREATED);
+    }
+
+    /**
      * @Route("/cart/add/{id}", name="cartadd",methods={"PUT","GET"})
      */
     public function cartadd(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
@@ -190,10 +200,10 @@ class ApiController extends AbstractController
             }
             $entityManager->remove($product);
             $entityManager->flush();    
-            return $this->json('deleted', Response::HTTP_CREATED);
+            return $this->json('deleted', Response::HTTP_ACCEPTED);
         }
         // }
-        return $this->json('nothing to delete', Response::HTTP_CREATED);
+        return $this->json('nothing to delete', Response::HTTP_OK);
     }
 
     // /**
