@@ -44,6 +44,9 @@
         "preferred-install": {
             "*": "dist"
         },
+        "config": {
+            "bin-dir": "bin"
+        },
         "sort-packages": true
     },
     "autoload": {
@@ -63,10 +66,10 @@
     },
     "scripts": {
         "test": [
-            "@php bin/phpunit tests/Index.php",
-            "@php bin/phpunit tests/Api/Product/AddProduct.php",
-            "@php bin/phpunit tests/Api/Product/AddOpt.php",
-            "@php bin/phpunit tests/Api/Product/RmProduct.php"
+            "./vendor/bin/simple-phpunit tests/Index.php",
+            "./vendor/bin/simple-phpunit tests/Api/Product/AddProduct.php",
+            "./vendor/bin/simple-phpunit tests/Api/Product/AddOpt.php",
+            "./vendor/bin/simple-phpunit tests/Api/Product/RmProduct.php"
         ],
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
