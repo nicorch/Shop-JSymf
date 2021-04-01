@@ -5,23 +5,43 @@
 {% block body %}
 <div class="container">
     <div class="d-flex justify-content-center container mt-5">
-    {% for product in products %}
+        {% for product in products %}
+                {% if product.isVisible %}
         <div class="card p-3 bg-white"><i class="fa fa-apple"></i>
-            <div class="about-product text-center mt-2"><img src="https://i.imgur.com/3VTaSeb.png" width="150">
+            <div class="about-product text-center mt-2"><img src="{{product.imgUrl}}" width="150">
                 <div>
                     <h4>{{product.name}}</h4>
                     <h6 class="mt-0 text-black-50">{{product.description}}</h6>
                 </div>
             </div>
             <div class="stats mt-2">
-                <div class="d-flex justify-content-between p-price"><span>Pro Display XDR</span><span>$5,999</span></div>
-                <div class="d-flex justify-content-between p-price"><span>Pro stand</span><span>$999</span></div>
-                <div class="d-flex justify-content-between p-price"><span>Vesa Mount Adapter</span><span>$199</span></div>
+                {% for option in product.options %}
+                <div class="d-flex justify-content-between p-price">
+                    <span>{{option.name}}</span>
+                    <input type="checkbox" class="right" name="" id="{{option.id}}">
+                    <span>
+                        {% if option.getPriceSupp %}
+                        +{{option.getPriceSupp}}€
+                        {% else %}
+                        +{{option.getPricePerc}}‰
+                        {% endif %}
+                    </span>
+                </div>
+                {% else %}
+                <span></span>
+                {% endfor %}
+                    
+                {# <div class="d-flex justify-content-between p-price"><span>Pro stand</span><span>$999</span></div>
+                <div class="d-flex justify-content-between p-price"><span>Vesa Mount Adapter</span><span>$199</span></div> #}
             </div>
-            <div class="d-flex justify-content-between total font-weight-bold mt-4"><a target="_blank" href="{{ path('product_item',{'id': product.id}) }}">Voir</a><span>{{product.price}} €</span></div>
+            <div class="d-flex justify-content-between total font-weight-bold mt-4"><a target="_blank"
+                    href="{{ path('product_item',{'id': product.id}) }}">json</a><span>{{product.price}} €</span><span>
+                        <a name="" id="" class="btn btn-primary" href="{{path('cartadd',{'id': product.id, 'redirect': true})}}" role="button">+</a>
+                    </span></div>
         </div>
-    {% else %}
-    {% endfor %}
+            {% endif %}
+        {% else %}
+        {% endfor %}
     </div>
 </div>
 {% endblock %}
