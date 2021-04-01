@@ -63,8 +63,8 @@
     },
     "scripts": {
         "test": {
-            "test:get:index": "php bin/phpunit tests/Index.php",
-            "test:product:add": "php bin/phpunit tests/Api/Product/AddTest.php"
+            "test:get:index": "php ./bin/phpunit tests/Index.php",
+            "test:product:add": "php ./bin/phpunit tests/Api/Product/AddTest.php"
         },
         "auto-scripts": {
             "cache:clear": "symfony-cmd",
