@@ -63,7 +63,7 @@ jobs:
       run: composer install --prefer-dist --no-progress --no-suggest
 
     - name: Force
-      run: composer req phpunit && chmod +x bin/phpunit
+      run: composer req phpunit && chmod +x phpunit
 
     # Add a test script to composer.json, for instance: "test": "vendor/bin/phpunit"
     # Docs: https://getcomposer.org/doc/articles/scripts.md
