@@ -65,6 +65,12 @@
         "symfony/polyfill-php72": "*"
     },
     "scripts": {
+        "test:jenkins": [
+            "./vendor/bin/simple-phpunit tests/Index.php --coverage-clover 'reports/coverage/coverage.xml'",
+            "./vendor/bin/simple-phpunit tests/Api/Product/AddProduct.php --coverage-clover 'reports/coverage/coverage.xml'",
+            "./vendor/bin/simple-phpunit tests/Api/Product/AddOpt.php --coverage-clover 'reports/coverage/coverage.xml'",
+            "./vendor/bin/simple-phpunit tests/Api/Product/RmProduct.php --coverage-clover 'reports/coverage/coverage.xml'"
+        ],
         "test": [
             "./vendor/bin/simple-phpunit tests/Index.php",
             "./vendor/bin/simple-phpunit tests/Api/Product/AddProduct.php",
