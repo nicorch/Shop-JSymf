@@ -1,0 +1,76 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Shop!{% endblock %}
+{% block navmenu %}{% endblock %}
+
+{% block body %}
+<div class="container">
+    <div class="justify-content-center container mt-5">
+        <h3>
+        Produits du panier
+        </h3>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th colspan=3><center>Nom</center></th>
+                    <th><center>Unités</center></th>
+                    <th ><center>Prix</center></th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in cart.products %}
+                <tr>
+                    <td>
+                    <center><a class="btn btn-danger btn-sm" href="{{path('cartrm',{id: product.id,'redirect-cart': 1})}}" role="button">Delete</a></center></td>
+                    <td scope="row">
+                        <img src="{{product.imgUrl}}" style='max-width:200px;max-height:150px' alt="Product Img">
+                    </td>
+                    <td>{{product.name}}</td>
+                    <td>
+                        <p>Prix : {{product.price|format_currency('EUR', locale='fr')}} <br>
+                            {% for option in product.options %}
+                                <span class="small">- {{option.name}}</span><br>
+                                <span class="small right">+{{option.getPriceSupp()|format_currency('EUR', locale='fr')}}</span>    
+                            {% endfor %}
+                        </p>
+                    </td>
+                    <td>
+                        <span class="right">
+                            {{product.priceTotal|format_currency('EUR', locale='fr')}}
+                        </span>
+                    </td>
+                </tr>
+                {% else %}
+                    <tr>
+                        <td scope="row" colspan="3"><center>Pas de produits</center></td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+            <thead>
+                <tr>
+                    <th></th>
+                    <th></th>
+                    <th></th>
+                    <th colspan=2>
+                        <span class="right small">Total : {{cart.total|format_currency('EUR', locale='fr') }}</span> <br>
+                        <span class="right small"> Taxes : {{cart.taxes|format_currency('EUR', locale='fr') }}</span> <br>
+                        <span class="right"> Sous-total <span class="small">(TTC)</span> : {{cart.ttc|format_currency('EUR', locale='fr')}}</span> 
+                    </th>
+                </tr>
+            </thead>
+        </table>
+        <a class="mt-2 mb-3 btn btn-success right" href="{{path('cartextract')}}" targett="_blank" role="button">Valider le panier</a>
+        <a class="mt-2 mb-3 mr-3 btn btn-light right" href="{{path('main_index')}}" role="button">Continuer les achats</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block cart %}{% endblock %}
+
+{% block javascripts %}
+<script>
+ $(document).ready(function () {
+
+ })
+</script>
+{% endblock %}
