@@ -5,6 +5,8 @@
     <meta charset="UTF-8">
     <title>{% block title %}App Shop{% endblock %}</title>
     {% block stylesheets %}
+    {% endblock %}
+    {% block stylesheets_base %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
         integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -33,20 +35,26 @@
     .cart .card {
         width: 240px;
     }
+    .small {
+        font-size: small;
+    }
+    .opt-input  {
+        margin-top: 3px;
+        margin-right: 3px;
+    }
 </style>
     {% endblock %}
 </head>
-
 <body>
     <nav class="navbar navbar-light bg-light">
         <a class="navbar-brand" href="{{ path('main_index') }}">
             <i width="30" height="30" class="d-inline-block align-top material-icons">store</i>
             Shop
         </a>
-        <a class="right" href="">
+        <a class="right" href="#btnValid" id="btnCart">
             Cart
             {% if cart.products|length != 0 %}
-                ({{cart.products|length}} product{% if cart.products|length > 1 %}s{% endif %}) {{cart.total}}€
+                ({{cart.products|length}} product{% if cart.products|length > 1 %}s{% endif %}) {{cart.total|format_currency('EUR', locale='fr')}}
                 {% else %}
                     Empty
             {% endif %}
@@ -55,41 +63,66 @@
             </i>
         </a>
     </nav>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
-        <a class="navbar-brand" href="{{ path('main_index') }}">Home</a>
-        <a class="nav-link" href="{{ path('configurator') }}">Configurator</a>
-        <a class="nav-link" href="{{ path('api') }}">Api</a>
-        </div>
-    </nav>
+
+    {% block navmenu %}
+        <nav class="navbar navbar-expand-lg navbar-light bg-light">
+            <a class="navbar-brand" href="{{ path('main_index') }}">Home</a>
+            <a class="nav-link" href="{{ path('configurator') }}">Configurator</a>
+            <a class="nav-link" href="{{ path('api') }}">Api</a>
+            </div>
+        </nav>
+    {% endblock %}
     {% block body %}{% endblock %}
-    <div class="container-fluid" style="margin-top: 50px">
-        <h6>Cart :</h6>
-        <ul class="cart">
-        {% for product in cart.products %}
-            <li>
-                <div class="card">
-                  <div class="card-body" style="height: 120px">
-                    <h4 class="card-title">{{product.name}}</h4>
-                    <h6 class="card-subtitle text-muted">{{product.price}}€</h6>
-                  </div>
-                  <img src="{{product.imgUrl}}" width="240px" height="270px" alt="">
-                  <div class="card-body">
-                    <p class="card-text">
-                    {% for opt in product.options %}
-                        <span>{{opt.name}} </span><span class="right"> +{{opt.getPriceSupp}}€</span>
-                    {% else %}
-                        
-                    {% endfor %}
-                    </p>
-                    {# <a href="#" class="card-link">Link 1</a> #}
-                    <a rel="nofollow" data-method="delete" href="{{path('cartrm',{'id': product.id,'redirect': true})}}" class="right card-link red-text">X</a>
-                  </div>
+    {% block cart %}
+        <div id="cart" style="display: none">
+        {% if cart.products|length != 0 %}
+            <div  class="container-fluid" style="margin-top: 50px">
+                <h6>Current Cart :</h6>
+                <ul class="cart">
+                {% for product in cart.products %}
+                    <li>
+                        <div class="card">
+                        <a rel="nofollow" data-method="delete" href="{{path('cartrm',{'id': product.id,'redirect': true})}}" class="btn btn-light red-text" style="width: 90%;margin-top: 5px;margin-right: auto;margin-left: auto">Retirer le produit</a>
+                        <div class="card-body" style="height: 110px; padding-top: 0; padding-bottom: 0">
+                            <h4 class="card-title">{{product.name}}</h4>
+                            <h6 class="card-subtitle text-muted">{{product.priceTotal|format_currency('EUR', locale='fr')}}</h6>
+                        </div>
+                        <img src="{{product.imgUrl}}" width="140px" height="170px" alt="Product img" style="margin: auto">
+                        <div class="card-body" style="padding-top: 7px;">
+                            <div class="card-text small">
+                                {% if product.options %}
+                                    <center>
+                                        Prix initial: {{product.price|format_currency('EUR', locale='fr')}} <br>
+                                    </center>
+                                {% endif %}
+                            {% for opt in product.options %}
+                                <span class="small">{{opt.name}} </span><span class="right small"> +{{opt.getPriceSupp|format_currency('EUR', locale='fr')}}</span>
+                            {% endfor %}
+                            </div>
+                            {# <a href="#" class="card-link">Link 1</a> #}
+                        </div>
+                        </div>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+            <div class="row m-2">
+                <div class="col">
+                    <center><a href="{{path('cartempty', {redirect: true})}}" class="btn btn-danger">Vider le panier</a></center>
                 </div>
-            </li>
-        {% endfor %}
-        </ul>
-    </div>
-    {% block javascripts %}
+                <div class="col">
+                    <center><a href="{{path('cartextract')}}" class="btn btn-warning" target="_blank">Extraire panier JSON</a></center>
+                </div>
+                <div class="col">
+                    <center><a id="btnValid" href="{{path('cart_validation')}}" class="btn btn-success" target="_blank">Valider le panier</a></center>
+                </div>
+            </div>
+        {% endif %}
+        </div>
+    {% endblock %}
+    
+    
+    {% block javascripts_base    %}
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js"
         integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous">
     </script>
@@ -100,7 +133,20 @@
         integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous">
     </script>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/4.1.3/js/bootstrap.bundle.min.js"></script>
-
+    <script>
+    $(document).ready(function () {
+        $('#btnCart').on('click', function () {
+            if ($('#cart').is(':visible')) {
+                $('#cart').hide()
+            } else {
+                $('#cart').show()
+                $('html').scroll( $(document).height());
+            }
+        })
+    })
+    </script>
+    {% endblock %}
+    {% block javascripts    %}
     {% endblock %}
 </body>
 

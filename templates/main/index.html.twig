@@ -2,46 +2,135 @@
 
 {% block title %}Shop!{% endblock %}
 
+{% block stylesheets %}
+<style>
+    .product-card {
+        min-width: 200px !important;
+        max-width: 200px !important;
+        margin: 2px;
+    }
+    .product-card img {
+        max-width: 100%;
+    }
+    ul.products {
+        padding:0;
+        margin:0;
+        list-style-type:none;
+        width: 100%;
+        max-width: 100%;
+        min-width: 100%;
+        display: inline-flex;
+        overflow-x: scroll !important;
+        }
+    .products > li {
+    margin-left: 5px;
+    width: 250px;
+    float:left; /*pour IE*/
+    }
+</style>
+{% endblock %}
 {% block body %}
-<div class="container">
-    <div class="d-flex justify-content-center container mt-5">
+<div class="">
+    <div class="justify-content-center mt-3">
+    {% if products %}
+    <center><p>{{productsVisibles}}</p></center>
+    {% endif %}
+    <ul class="products">
         {% for product in products %}
-                {% if product.isVisible %}
-        <div class="card p-3 bg-white"><i class="fa fa-apple"></i>
-            <div class="about-product text-center mt-2"><img src="{{product.imgUrl}}" width="150">
-                <div>
-                    <h4>{{product.name}}</h4>
-                    <h6 class="mt-0 text-black-50">{{product.description}}</h6>
-                </div>
-            </div>
-            <div class="stats mt-2">
-                {% for option in product.options %}
-                <div class="d-flex justify-content-between p-price">
-                    <span>{{option.name}}</span>
-                    <input type="checkbox" class="right" name="" id="{{option.id}}">
-                    <span>
-                        {% if option.getPriceSupp %}
-                        +{{option.getPriceSupp}}€
+            {% if product.isVisible %}
+            <li>
+                <div class="card pl-3 pr-3 pb-3 product-card bg-white"><i class="fa fa-apple"></i>
+                    <a rel="nofollow" data-method="delete" href="{{path('product_delete',{'id': product.id,'redirect': true})}}" class="btn btn-light btn-sm small red-text" style="width: 90%;margin-top: 5px;margin-right: auto;margin-left: auto">Supprimer le produit</a>
+                    <div class="about-product text-center mt-2"><img src="{{product.imgUrl}}">
+                        <div>
+                            <h4>{{product.name}}</h4>
+                            <h6 class="mt-0 text-black-50">{{product.description}}</h6>
+                        </div>
+                    </div>
+                    <div class="stats mt-2">
+                        {% for option in product.options %}
+                            <div class="d-flex justify-content-between p-price small">
+                                <input type="checkbox" class="opt-input prd-{{product.id}} left" name="" data-product="{{product.id}}" data-productprice="{{product.price}}" data-price="{{option.priceSupp}}" id="{{option.id}}">
+                                <span class="" style="width: 100%;">{{option.name}}</span>
+                                <span>
+                                    {% if option.getPriceSupp %}
+                                    +{{option.getPriceSupp|format_currency('EUR', locale='fr')}}
+                                    {% else %}
+                                    +{{option.getPricePerc}}‰
+                                    {% endif %}
+                                </span>
+                            </div>
                         {% else %}
-                        +{{option.getPricePerc}}‰
-                        {% endif %}
-                    </span>
+                        <span></span>
+                        {% endfor %}
+                            
+                        {# <div class="d-flex justify-content-between p-price"><span>Pro stand</span><span>$999</span></div>
+                        <div class="d-flex justify-content-between p-price"><span>Vesa Mount Adapter</span><span>$199</span></div> #}
+                    </div>
+                    <div class="d-flex justify-content-between total font-weight-bold mt-4"><a target="_blank"
+                        href="{{ path('product_item',{'id': product.id}) }}">json</a><span class="span-price-{{product.id}}">{{product.price|format_currency('EUR', locale='fr')}}</span><span>
+                        <a name="" id="link_product_{{product.id}}" data-product="{{product.id}}" class="btn btn-primary link-product" href="#" role="button">+</a></span>
+                    </div>
                 </div>
-                {% else %}
-                <span></span>
-                {% endfor %}
-                    
-                {# <div class="d-flex justify-content-between p-price"><span>Pro stand</span><span>$999</span></div>
-                <div class="d-flex justify-content-between p-price"><span>Vesa Mount Adapter</span><span>$199</span></div> #}
-            </div>
-            <div class="d-flex justify-content-between total font-weight-bold mt-4"><a target="_blank"
-                    href="{{ path('product_item',{'id': product.id}) }}">json</a><span>{{product.price}} €</span><span>
-                        <a name="" id="" class="btn btn-primary" href="{{path('cartadd',{'id': product.id, 'redirect': true})}}" role="button">+</a>
-                    </span></div>
-        </div>
+            </li>
+
             {% endif %}
         {% else %}
         {% endfor %}
+    </ul>
+
     </div>
 </div>
+{% endblock %}
+
+{% block javascripts %}
+<script>
+ $(document).ready(function () {
+
+     $('a.link-product').on('click',function() {
+         var id_product =  $(this).data('product'),
+         options = "1",
+         opt_class = '.prd-'+id_product,
+          opt_string = getOptionsIdString(id_product),
+          count = 0;
+        var url = "{{ path('cartadd',{'id': "id_product", 'redirect': 1, 'options': "optionslist"}) }}",
+            new_url = url.replace('id_product',id_product).replace('optionslist',opt_string);
+        console.log(new_url);
+        $(this).attr('href', new_url );
+        // $(this).trigger('click');
+     })
+
+     $('input.opt-input').on('change',function () {
+        optionEvents($(this).data('product'));
+     })
+
+     function getOptionsIdString(productid) {
+        var opt_class = '.prd-'+productid,
+            opt_string = "",
+            count = 0;
+        $(opt_class).each((i,element) => {
+            if ($(element).is(':checked')) {
+                if (count>0) opt_string += ",";
+                opt_string += element.id;
+                count += 1 ;
+            }
+        });
+        return opt_string;
+     }
+
+     function optionEvents(productid) {
+        var opt_class = '.prd-'+productid,
+            opt_className = '.prd-'+productid,
+            prix = $(opt_class).first().data('productprice');
+
+        $(opt_class).each((i,element) => {
+            if ($(element).is(':checked')) {
+                prix += $(element).data('price');
+                prix = Math.round((prix + Number.EPSILON) * 100) / 100;
+            }
+        });
+        $('.span-price-'+productid).text(prix+' €');   
+     }
+ })
+</script>
 {% endblock %}

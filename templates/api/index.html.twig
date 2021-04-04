@@ -3,25 +3,36 @@
 {% block title %}Endpoints{% endblock %}
 
 {% block body %}
-<div class="">
+<div class="container">
     <h1>Endpoints List</h1>
 
-    Products:
+    Products :
     <ul>
         <li>GET - All product are listed in <code><a href="{{path('products')}}" target="_blank">api/products</a></code></li>
         <li>GET - One product is detail in <code><a href="{{path('product_item', {'id': 1})}}" target="_blank">api/product/{id}</a></code></li>
-        <li>PUT - Add one product in <code><a target="_blank">api/product/</a></code></li>
-        <li>STASH - Edit one product by resent it in <code><a href="#">api/product/edit/{id}</a></code></li>
+        <li>PUT - Add one product in <code><a href="#" target="_blank">api/product/new</a></code> (send JSON)</li>
+        <li>STASH - Edit one product by resent it in <code><a>api/product/edit/{id}</a></code></li>
         <li>DELETE - Delete one product in <code><a href="#">api/product/rm/{id}</a></code></li>
     </ul>
 
-    Option:
+    Option :
     <ul>
-        <li>PUT - Add one option to product in <code><a href="#">api/option/new</a></code></li>
-        <li>DELETE - Remove one option's product in <code><a href="#">api/product/{id_p}/rm-opt/{id_opt}</a></code></li>
         <li>GET - All options are listed in <code><a href="{{path('options')}}" target="_blank">api/options</a></code></li>
         <li>GET - One option is detail in <code><a href="{{path('option_item', {'id': 1})}}" target="_blank">api/option/{id}</a></code></li>
+        <li>PUT - Add one option to product in <code><a href="#">api/option/new</a></code> (send JSON)</li>
         <li>STASH - Edit one product by resent it in <code><a>api/product/edit/{id}</a></code></li>
+        <li>DELETE - Remove one option's product in <code><a href="#">api/product/{id_p}/rm-opt/{id_opt}</a></code></li>
+    </ul>
+
+    Cart : 
+    <ul>
+        <li>GET - Get cart in <code><a href="{{path('cartextract')}}" target="_blank">api/cart/extract</a></code></li>
+        <li>PUT - Add product to cart at <code><a target="_blank">api/cart/add/{id}</a></code></li>
+        <ul>
+            <li>Not working with product who has options yet</li>
+        </ul>
+        <li>DELETE - Remove one product from cart at <code><a href="#" target="_blank">api/cart/rm/{id}</a></code></li>
+        <li>DELETE - Remove all products in cart at <code><a href="{{path('cartempty')}}" target="_blank">api/cart/empty</a></code></li>
     </ul>
 </div>
 {% endblock %}
