@@ -35,6 +35,156 @@ class ApiController extends AbstractController
     }
 
     /**
+     * @Route("/product/getlast", name="product_last",methods={"GET"})
+     */
+    public function productLast(EntityManagerInterface $em): Response
+    {
+        $product = $em->getRepository(Product::class)->findOneBy(array(),array('id'=>'DESC'),1,0);
+
+        return $this->json($product->toArray(), Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/cart/add/{id}", name="cartadd",methods={"PUT","GET"})
+     */
+    public function cartadd(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
+    {
+        $cart = $mn->getCart($em);
+        $hasOpt = false;
+        $optionsStrings = $request->query->get('options');
+        if (!$optionsStrings) $optionsStrings = $request->query->get('amp;options');
+
+        $optionsId = explode(',',$optionsStrings);
+        if ($optionsId[0] != "") $hasOpt = true;
+
+        // if ($cart->getProducts()->contains($product)) {
+            $product2 = new Product();
+            $product2->setName($product->getName());
+            $product2->setDescription($product->getDescription());
+            $product2->setPrice($product->getPrice());
+            $product2->setImgUrl($product->getImgUrl());
+            $product2->setIsVisible(false);
+            $product2->setIsClone(true);
+            $product2->setPriceTotal($product2->getPrice());
+            if ($hasOpt) {
+                foreach ($optionsId as $id) {
+                    $optionB = $em->getRepository(Option::class)->findOneBy(['id' => $id]);
+                    $option = new Option();
+                    $option->setName($optionB->getName());
+                    $option->setType($optionB->getType());
+                    $option->setPriceSupp($optionB->getPriceSupp());
+                    $option->setPricePerc($optionB->getPricePerc());
+                    $product2->addOption($option);
+                    $product2->setPriceTotal($product2->getPrice() + $optionB->getPriceSupp());
+                    $em->persist($option);
+                }
+            }
+            $cart->addProduct($product2);
+            $em->persist($product2);
+            $em->flush();
+            if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
+            return $this->json("added +", Response::HTTP_CREATED);
+        // } else {
+        //     $cart->addProduct($product);
+        //     $em->flush();
+        //     if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
+        //     return $this->json("added", Response::HTTP_CREATED);
+        // }
+    }
+
+    /**
+     * @Route("/cart/rm/{id}", name="cartrm",methods={"DELETE","GET"})
+     */
+    public function cartrm(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
+    {
+        $cart = $mn->getCart($em);
+        $cart->removeProduct($product);
+        $options = $product->getOptions();
+        if ($options) {
+            foreach ($options as $opt) {
+                $product->removeOption($opt);
+                $em->remove($opt);
+            }   
+        }
+        if ($product->getIsClone()) {
+            $em->remove($product);
+            $em->flush();
+            if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
+            if ($request->query->get('redirect-cart')) return $this->redirectToRoute('cart_validation');
+            return $this->json("Product removed", Response::HTTP_OK);
+        } else $em->flush();
+        if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
+        return $this->json("nothing removed", Response::HTTP_ACCEPTED);
+    }
+
+    /**
+     * @Route("/cart/empty", name="cartempty",methods={"DELETE","GET"})
+     */
+    public function cartEmpty(MainController $mn, Request $request,EntityManagerInterface $em): Response
+    {
+        $cart = $mn->getCart($em);
+        $products = $cart->getProducts();
+        foreach ($cart->getProducts() as $productCurr) {
+            $cart->removeProduct($productCurr);
+            foreach ($productCurr->getOptions() as $opt) {
+                $productCurr->removeOption($opt);
+                $em->remove($opt);
+            }
+            $em->remove($productCurr);
+        } 
+        $em->flush();
+        if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
+        return $this->json("removed", Response::HTTP_OK);
+    }
+
+    /**
+     * @Route("/product/{id}/rm-opt/{idopt}", name="productremoveopt",methods={"DELETE"})
+     */
+    public function optionDeleteItem(Product $product, int $idopt, Request $request,EntityManagerInterface $em, SerializerInterface $serial,ValidatorInterface $validator): Response
+    {
+        $option = $em->getRepository(Option::class)->findOneBy(['id' => $idopt]);
+
+        if ($option) {
+            $product->removeOption($option);
+
+            $em->remove($option);
+            $em->flush();
+            return $this->json('deleted', Response::HTTP_OK);
+        }
+        return $this->json('nothing to delete', Response::HTTP_ACCEPTED);
+    }
+    
+    /**
+     * @Route("/cart/extract", name="cartextract")
+     */
+    public function cartExtract(MainController $mn,EntityManagerInterface $em): Response
+    {
+        return $this->json($mn->getCart($em)->toArray());
+    }
+
+    /**
+     * @Route("/products", name="products")
+     */
+    public function products(EntityManagerInterface $em): Response
+    {
+        return $this->json(array_map(function ($product)
+        {
+            return $product->toArray();
+        }, $em->getRepository(Product::class)->findAll()));
+    }
+
+    /**
+     * @Route("/product/{id}", name="product_item")
+     */
+    public function productItem(EntityManagerInterface $em,$id): Response
+    {
+        return $this->json(array_map(function ($product)
+        {
+            return $product->toArray();
+        }, $em->getRepository(Product::class)->findById($id)));
+    }
+
+    /**
      * @Route("/product/new", name="productnewitem",methods={"PUT"})
      */
     public function productNewItem(Request $request,EntityManagerInterface $em,ValidatorInterface $validator): Response
@@ -53,103 +203,26 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/option/new", name="productnewopt",methods={"PUT"})
+     * @Route("/product/rm/{id}", name="product_delete", methods={"DELETE","GET"})
      */
-    public function optionNewItem(Request $request,EntityManagerInterface $em, SerializerInterface $serial,ValidatorInterface $validator): Response
+    public function deleteProduct(Request $request, Product $product): Response
     {
-        $data = json_decode($request->getContent(),true);
-        $form = $this->createForm(OptionType::class, new Option, ['csrf_protection' => false]);
-        $form->submit($data);
-
-        if (!$form->isValid()) {
-            return $this->json( 'Error', Response::HTTP_BAD_REQUEST); // Code 400
-        }
-        $option = $form->getData();
-        $em->persist($option);
-        $em->flush();
-        return $this->json($option->toArray(), Response::HTTP_CREATED);
-    }
-
-    /**
-     * @Route("/product/getlast", name="product_last",methods={"GET"})
-     */
-    public function productLast(EntityManagerInterface $em): Response
-    {
-        $product = $em->getRepository(Product::class)->findOneBy(array(),array('id'=>'DESC'),1,0);
-
-        return $this->json($product->toArray(), Response::HTTP_CREATED);
-    }
-
-    /**
-     * @Route("/cart/add/{id}", name="cartadd",methods={"PUT","GET"})
-     */
-    public function cartadd(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
-    {
-        $cart = $mn->getCart($em);
-        if ($cart->getProducts()->contains($product)) {
-            $product2 = new Product();
-            $product2->setName($product->getName());
-            $product2->setDescription($product->getDescription());
-            $product2->setPrice($product->getPrice());
-            $product2->setImgUrl($product->getImgUrl());
-            $product2->setIsVisible(false);
-            $product2->setIsClone(true);
-            $cart->addProduct($product2);
-            $em->persist($product2);
-            $em->flush();
+        // if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->request->get('_token'))) {
+        if (!empty($product)) {
+            $entityManager = $this->getDoctrine()->getManager();
+            $options = $product->getOptions();
+            foreach ($options as $opt) {
+                $product->removeOption($opt);
+                $entityManager->remove($opt);
+            }
+            $entityManager->remove($product);
+            $entityManager->flush();    
             if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
-            return $this->json("added +", Response::HTTP_CREATED);
-        } else {
-            $cart->addProduct($product);
-            $em->flush();
-            if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
-            return $this->json("added", Response::HTTP_CREATED);
+            return $this->json('deleted', Response::HTTP_OK);
         }
-    }
-
-    /**
-     * @Route("/cart/rm/{id}", name="cartrm",methods={"DELETE","GET"})
-     */
-    public function cartrm(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
-    {
-        $cart = $mn->getCart($em);
-        $cart->removeProduct($product);
-        if ($product->getIsClone()) {
-            $em->remove($product);
-            $em->flush();
-            if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
-            return $this->json($request->query, Response::HTTP_CREATED);
-        }
+        // }
         if ($request->query->get('redirect')) return $this->redirectToRoute('main_index');
-        return $this->json("nothing removed", Response::HTTP_CREATED);
-    }
-
-    /**
-     * @Route("/product/{id}/rm-opt/{idopt}", name="productremoveopt",methods={"DELETE"})
-     */
-    public function optionDeleteItem(Product $product, int $idopt, Request $request,EntityManagerInterface $em, SerializerInterface $serial,ValidatorInterface $validator): Response
-    {
-        $option = $em->getRepository(Option::class)->findOneBy(['id' => $idopt]);
-
-        if ($option) {
-            $product->removeOption($option);
-
-            $em->remove($option);
-            $em->flush();
-            return $this->json('deleted', Response::HTTP_CREATED);
-        }
-        return $this->json('nothing to delete', Response::HTTP_CREATED);
-    }
-    
-    /**
-     * @Route("/products", name="products")
-     */
-    public function products(EntityManagerInterface $em): Response
-    {
-        return $this->json(array_map(function ($product)
-        {
-            return $product->toArray();
-        }, $em->getRepository(Product::class)->findAll()));
+        return $this->json('nothing to delete', Response::HTTP_ACCEPTED);
     }
 
     /**
@@ -175,35 +248,21 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/product/{id}", name="product_item")
+     * @Route("/option/new", name="productnewopt",methods={"PUT"})
      */
-    public function productItem(EntityManagerInterface $em,$id): Response
+    public function optionNewItem(Request $request,EntityManagerInterface $em, SerializerInterface $serial,ValidatorInterface $validator): Response
     {
-        return $this->json(array_map(function ($product)
-        {
-            return $product->toArray();
-        }, $em->getRepository(Product::class)->findById($id)));
-    }
+        $data = json_decode($request->getContent(),true);
+        $form = $this->createForm(OptionType::class, new Option, ['csrf_protection' => false]);
+        $form->submit($data);
 
-    /**
-     * @Route("/product/rm/{id}", name="product_delete", methods={"DELETE"})
-     */
-    public function deleteProduct(Request $request, Product $product): Response
-    {
-        // if ($this->isCsrfTokenValid('delete'.$product->getId(), $request->request->get('_token'))) {
-        if (!empty($product)) {
-            $entityManager = $this->getDoctrine()->getManager();
-            $options = $product->getOptions();
-            foreach ($options as $opt) {
-                $product->removeOption($opt);
-                $entityManager->remove($opt);
-            }
-            $entityManager->remove($product);
-            $entityManager->flush();    
-            return $this->json('deleted', Response::HTTP_ACCEPTED);
+        if (!$form->isValid()) {
+            return $this->json( 'Error', Response::HTTP_BAD_REQUEST); // Code 400
         }
-        // }
-        return $this->json('nothing to delete', Response::HTTP_OK);
+        $option = $form->getData();
+        $em->persist($option);
+        $em->flush();
+        return $this->json($option->toArray(), Response::HTTP_CREATED);
     }
 
     // /**
