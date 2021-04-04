@@ -60,6 +60,21 @@ class Cart
         $this->ttc = 0;
     }
 
+    public function toArray()
+    {
+        return [
+            'id' => $this->getId(),
+            'total' => $this->getTotal(),
+            'taxes' => $this->getTaxes(),
+            'ttc' => $this->getTtc(),
+            'dateEdited' => ($this->getDateEdited()) ? $this->getDateEdited()->format('d-m-Y H:i') : null,
+            'dateCreated' => $this->getDateCreated()->format('d-m-Y H:i'),
+            'products' => array_map(function ($product){
+                return $product->toArray();
+            }, $this->getProducts()->toArray()),
+        ];
+    }
+
     public function getId(): ?int
     {
         return $this->id;

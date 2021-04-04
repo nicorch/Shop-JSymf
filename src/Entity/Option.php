@@ -43,14 +43,19 @@ class Option
      */
     private $product;
 
+    public function __construct()
+    {
+        $this->type = 'opt';
+    }
+
     public function toArray()
     {
         return [
             'id' => $this->getId(),
             'name' => $this->getName(),
-            'type' => $this->getType(),
+            // 'type' => $this->getType(),
             'price_supp' => ($this->getPriceSupp()) ? $this->getPriceSupp() : null,
-            'price_perc' => ($this->getPricePerc()) ? $this->getPricePerc() : null,
+            // 'price_perc' => ($this->getPricePerc()) ? $this->getPricePerc() : null,
         ];
     }
     

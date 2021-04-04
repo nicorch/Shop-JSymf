@@ -75,11 +75,22 @@ class Product
      */
     private $isClone;
 
+    /**
+     * @ORM\Column(type="float")
+     */
+    private $priceTotal;
+
     public function __construct()
     {
         $this->dateCreated = new DateTime();
         $this->options = new ArrayCollection();
         $this->isClone = false;
+        $this->priceTotal = $this->price;
+    }
+
+    public function __toString()
+    {
+        return $this->getName() . ' ('.$this->getPriceTotal().')';
     }
 
     public function toArray()
@@ -88,6 +99,7 @@ class Product
             'id' => $this->getId(),
             'name' => $this->getName(),
             'price' => $this->getPrice(),
+            'priceTotal' => $this->getPriceTotal(),
             'description' => ($this->getDescription()) ? $this->getDescription() : null,
             'color' => ($this->getColor()) ? $this->getColor() : null,
             'size' => ($this->getSize()) ? $this->getSize() : null,
@@ -227,6 +239,11 @@ class Product
         if (!$this->options->contains($option)) {
             $this->options[] = $option;
             $option->setProduct($this);
+            $price = $this->getPrice();
+            foreach ($this->getOptions() as $opt) {
+                $price += $opt->getPriceSupp();
+            }
+            $this->setPriceTotal($price);
         }
 
         return $this;
@@ -239,6 +256,11 @@ class Product
             if ($option->getProduct() === $this) {
                 $option->setProduct(null);
             }
+            $price = $this->getPrice();
+            foreach ($this->getOptions() as $opt) {
+                $price += $opt->getPriceSupp();
+            }
+            $this->setPriceTotal($price);
         }
 
         return $this;
@@ -252,6 +274,18 @@ class Product
     public function setIsClone(bool $isClone): self
     {
         $this->isClone = $isClone;
+
+        return $this;
+    }
+
+    public function getPriceTotal(): ?float
+    {
+        return $this->priceTotal;
+    }
+
+    public function setPriceTotal(float $priceTotal): self
+    {
+        $this->priceTotal = $priceTotal;
 
         return $this;
     }
