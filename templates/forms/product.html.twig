@@ -1,4 +1,37 @@
 {{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+<div class="container">
+    <center><b>Product</b></center>
+    {{ form_start(form) }}
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(form.name) }}
+        {{ form_widget(form.name, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.name) }}
+        </div>
+    </div>
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(form.price) }}
+        {{ form_widget(form.price, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.price) }}
+        </div>
+    </div>
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(form.description) }}
+        {{ form_widget(form.description, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.description) }}
+        </div>
+    </div>
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(form.imgUrl) }}
+        {{ form_widget(form.imgUrl, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(form.imgUrl) }}
+        </div>
+    </div>
+     {{ form_widget(form) }}
+    {{ form_end(form) }}
+    <button class="btn">{{ button_label|default('Ajouter') }}</button>
+</div>
 {{ form_end(form) }}

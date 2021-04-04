@@ -1,0 +1,36 @@
+{{ form_start(formOpt) }}
+<div class="container">
+    <center><b>Option</b></center>
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(formOpt.name) }}
+        {{ form_widget(formOpt.name, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(formOpt.name) }}
+        </div>
+    </div>
+    {# <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(formOpt.type) }}
+        {{ form_widget(formOpt.type, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(formOpt.type) }}
+        </div>
+    </div> #}
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(formOpt.price_supp) }}
+        {{ form_widget(formOpt.price_supp, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(formOpt.price_supp) }}
+        </div>
+    </div>
+    <div class="form-control">
+        <i class="fa fa-calendar"></i>{{ form_label(formOpt.product) }}
+        {{ form_widget(formOpt.product, {'attr': {'class': 'form-control'}}) }}
+        <div class="form-error">
+            {{ form_errors(formOpt.product) }}
+        </div>
+    </div>
+    {{ form_widget(formOpt) }}
+    {{ form_end(formOpt) }}
+   <button class="btn">{{ button_label|default('Ajouter') }}</button>
+</div>
+{{ form_end(form) }}

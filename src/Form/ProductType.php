@@ -7,8 +7,10 @@ use App\Entity\Product;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use Symfony\Component\Form\Extension\Core\Type\UrlType;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\FormType;
+use Symfony\Component\Form\Extension\Core\Type\MoneyType;
 use Symfony\Component\Form\Extension\Core\Type\CollectionType;
 
 class ProductType extends AbstractType
@@ -17,16 +19,16 @@ class ProductType extends AbstractType
     {
         $builder
             ->add('name')
-            ->add('price')
+            ->add('price', MoneyType::class)
             ->add('description')
-            ->add('isVisible')
-            ->add('imgUrl')
-            ->add('color')
-            ->add('size')
-            ->add( 'options', CollectionType::class, [
-                'by_reference' => false,
-                'allow_add' => true
-            ])
+            // ->add('isVisible')
+            ->add('imgUrl', UrlType::class)
+            // ->add('color')
+            // ->add('size')
+            // ->add( 'options', CollectionType::class, [
+            //     'by_reference' => false,
+            //     'allow_add' => true
+            // ])
         ;
     }
 
