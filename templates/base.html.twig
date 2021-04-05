@@ -74,7 +74,7 @@
     {% endblock %}
     {% block body %}{% endblock %}
     {% block cart %}
-        <div id="cart" style="display: none">
+        <div id="cart" style="display: ">
         {% if cart.products|length != 0 %}
             <div  class="container-fluid" style="margin-top: 50px">
                 <h6>Current Cart :</h6>
@@ -136,12 +136,12 @@
     <script>
     $(document).ready(function () {
         $('#btnCart').on('click', function () {
-            if ($('#cart').is(':visible')) {
-                $('#cart').hide()
-            } else {
-                $('#cart').show()
-                $('html').scroll( $(document).height());
-            }
+            // if ($('#cart').is(':visible')) {
+            //     // $('#cart').hide()
+            // } else {
+            //     // $('#cart').show()
+            //     $('html').scroll( $(document).height());
+            // }
         })
     })
     </script>

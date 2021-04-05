@@ -19,17 +19,15 @@ class AddOpt extends WebTestCase
         
         $json = '{
             "product": '.$responseData['id'].',
-            "type": "signature",
             "name": "Signature spéciale",
-            "price_supp": 25.99,
-            "price_perc": null
+            "price_supp": 25.99
         }';
         echo($json);
-        $client->request('PUT', '/api/option/new', [],[],
+        $client->request('PUT', '/api/option/new/', [],[],
             ['CONTENT_TYPE' => 'application/json'],
             $json
         );
-
+        echo($client->getResponse());
         $this->assertEquals(201, $client->getResponse()->getStatusCode());
     }
 

@@ -21,7 +21,9 @@ class OptionType extends AbstractType
                 'label' => 'Price added'
             ])
             ->add('product', EntityType::class, ['class' => Product::class,
-            'label' => 'Related Product'])
+            'label' => 'Related Product',
+            
+            ])
         ;
     }
 

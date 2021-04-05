@@ -19,9 +19,10 @@ class RmTest extends WebTestCase
 
         $client->request('DELETE', '/api/product/rm/'.$responseData['id']);
         $response = $client->getResponse();
+        echo($response);
         // $this->assertTrue($response->headers->contains('Content-Type', 'application/json'));
         // $this->assertJson($response->getContent());
-        $this->assertEquals(202, $client->getResponse()->getStatusCode());
+        $this->assertEquals(200, $client->getResponse()->getStatusCode());
     }
 
 }

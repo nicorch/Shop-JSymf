@@ -45,7 +45,7 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/cart/add/{id}", name="cartadd",methods={"PUT","GET"})
+     * @Route("/cart/add/{id}", name="cartadd")
      */
     public function cartadd(MainController $mn, Request $request,EntityManagerInterface $em, Product $product,ValidatorInterface $validator): Response
     {
@@ -185,21 +185,24 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/product/new", name="productnewitem",methods={"PUT"})
+     * @Route("/product/new/", name="productnewitem",methods={"PUT","GET"})
      */
-    public function productNewItem(Request $request,EntityManagerInterface $em,ValidatorInterface $validator): Response
+    public function productNewItem(Request $request,EntityManagerInterface $em): Response
     {
         $data = json_decode($request->getContent(),true);
-        $form = $this->createForm(ProductType::class, new Product, ['csrf_protection' => false]);
-        $form->submit($data);
-
-        if (!$form->isValid()) {
-            return $this->json( $form->getErrors(), Response::HTTP_BAD_REQUEST); // Code 400
-        }
-        $product = $form->getData();
-        $em->persist($product);
-        $em->flush();
-        return $this->json($product->toArray(), Response::HTTP_CREATED);
+        if ($data) {
+            $form = $this->createForm(ProductType::class, new Product, ['csrf_protection' => false]);
+            $form->submit($data);
+            if (!$form->isValid()) {
+                return $this->json([' An error occured :', $form->getErrors()], Response::HTTP_BAD_REQUEST); // Code 400
+            }
+            $product = $form->getData();
+            $product->setIsVisible(true);
+            $product->setPriceTotal($product->getPrice());
+            $em->persist($product);
+            $em->flush();
+            return $this->json(['Created :',$product->toArray()], Response::HTTP_CREATED);
+        } else return $this->json('No data sent', Response::HTTP_OK);
     }
 
     /**
@@ -248,21 +251,23 @@ class ApiController extends AbstractController
     }
 
     /**
-     * @Route("/option/new", name="productnewopt",methods={"PUT"})
+     * @Route("/option/new/", name="productnewopt",methods={"PUT"})
      */
     public function optionNewItem(Request $request,EntityManagerInterface $em, SerializerInterface $serial,ValidatorInterface $validator): Response
     {
         $data = json_decode($request->getContent(),true);
-        $form = $this->createForm(OptionType::class, new Option, ['csrf_protection' => false]);
-        $form->submit($data);
+        if ($data) {
+            $form = $this->createForm(OptionType::class, new Option, ['csrf_protection' => false]);
+            $form->submit($data);
 
-        if (!$form->isValid()) {
-            return $this->json( 'Error', Response::HTTP_BAD_REQUEST); // Code 400
-        }
-        $option = $form->getData();
+            if (!$form->isValid()) {
+                return $this->json( ['Error', $form->getErrors()], Response::HTTP_BAD_REQUEST); // Code 400
+            }
+            $option = $form->getData();
         $em->persist($option);
         $em->flush();
-        return $this->json($option->toArray(), Response::HTTP_CREATED);
+        return $this->json(['Created :',$option->toArray(),'Add to this product :',$option->getProduct()->toArray()], Response::HTTP_CREATED);
+    } else return $this->json('No data sent', Response::HTTP_OK);
     }
 
     // /**
