@@ -31,6 +31,7 @@ class ConfiguratorController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
             $entityManager->persist($product);
+            
             $entityManager->flush();
 
             return $this->redirectToRoute('configurator');
@@ -40,12 +41,12 @@ class ConfiguratorController extends AbstractController
         $option = new Option();
         $formOpt = $this->createForm(OptionType::class,$option);
         $formOpt->handleRequest($request);
-
+        $product2 ='';
         if ($formOpt->isSubmitted() && $formOpt->isValid()) {
             $entityManager = $this->getDoctrine()->getManager();
-            $product = $option->getProduct();
+            $product2 = $option->getProduct();
             $option->setProduct(null);
-            $product->addOption($option); // to call setters
+            $product2->addOption($option); // to call setters
             $entityManager->persist($option);   
             $entityManager->flush();
 
@@ -54,7 +55,7 @@ class ConfiguratorController extends AbstractController
         return $this->render('configurator/index.html.twig', [
             'controller_name' => 'ConfiguratorController',
             'cart' => $mn->getCart($em),
-            'product' => $product,
+            'product' => $product2,
             'form' => $form->createView(),
             'formOpt' => $formOpt->createView(),
         ]);

@@ -51,7 +51,7 @@ class Product
     private $isVisible;
 
     /**
-     * @ORM\Column(type="string", length=255, nullable=true)
+     * @ORM\Column(type="text", length=255, nullable=true)
      */
     private $imgUrl;
 
@@ -76,7 +76,7 @@ class Product
     private $isClone;
 
     /**
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="float", nullable=true)
      */
     private $priceTotal;
 
@@ -85,7 +85,7 @@ class Product
         $this->dateCreated = new DateTime();
         $this->options = new ArrayCollection();
         $this->isClone = false;
-        $this->priceTotal = $this->price;
+        $this->priceTotal = 0;
     }
 
     public function __toString()
@@ -138,7 +138,8 @@ class Product
     public function setPrice(float $price): self
     {
         $this->price = $price;
-
+        $this->priceTotal = $price;
+        
         return $this;
     }
 
